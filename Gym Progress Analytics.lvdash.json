@@ -1,0 +1,739 @@
+{
+  "datasets": [
+    {
+      "name": "abce452b",
+      "displayName": "Daily Weight Progress and Change Tracking",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gym_progress`;\n",
+        "\n",
+        "SELECT\n",
+        "  Day_Number,\n",
+        "  Weight_kg,\n",
+        "  LAG(Weight_kg) OVER (ORDER BY Day_Number)       AS Prev_Weight,\n",
+        "  Weight_kg - LAG(Weight_kg) OVER (ORDER BY Day_Number) AS Weight_Change\n",
+        "FROM workspace.gym_progress.gym_progress_clean\n",
+        "ORDER BY Day_Number;\n"
+      ]
+    },
+    {
+      "name": "cf810063",
+      "displayName": "Untitled dataset",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `default`;\n",
+        "\n",
+        "SELECT\n",
+        "  Day_Number,\n",
+        "  Weight_kg,\n",
+        "  AVG(Weight_kg) OVER (\n",
+        "      ORDER BY Day_Number\n",
+        "      ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n",
+        "  ) AS Moving_Avg_Weight_3d\n",
+        "FROM workspace.gym_progress.gym_progress_clean\n",
+        "ORDER BY Day_Number;\n"
+      ]
+    },
+    {
+      "name": "197d28be",
+      "displayName": "Untitled dataset",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `default`;\n",
+        "\n",
+        "SELECT\n",
+        "  Day_Number,\n",
+        "  Steps_Walked,\n",
+        "  SUM(Steps_Walked) OVER (ORDER BY Day_Number) AS Cumulative_Steps\n",
+        "FROM workspace.gym_progress.gym_progress_clean\n",
+        "ORDER BY Day_Number;\n"
+      ]
+    },
+    {
+      "name": "8a4aed74",
+      "displayName": "Untitled dataset",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `default`;\n",
+        "\n",
+        "SELECT\n",
+        "  Day_Number,\n",
+        "  Workout_Duration_min,\n",
+        "  Steps_Walked,\n",
+        "  Steps_per_minute,\n",
+        "  NTILE(4) OVER (ORDER BY Steps_per_minute) AS Efficiency_Quartile\n",
+        "FROM workspace.gym_progress.gym_progress_clean\n",
+        "ORDER BY Day_Number;\n"
+      ]
+    },
+    {
+      "name": "0b063925",
+      "displayName": "Averages",
+      "queryLines": [
+        "SELECT\n",
+        "  AVG(Weight_kg)          AS Avg_Weight,\n",
+        "  AVG(Steps_Walked)       AS Avg_Steps,\n",
+        "  AVG(Calorie_Balance)    AS Avg_Calorie_Balance,\n",
+        "  AVG(Protein_per_kg)     AS Avg_Protein_per_kg,\n",
+        "  AVG(Steps_per_minute)   AS Avg_Steps_per_minute\n",
+        "FROM workspace.gym_progress.gym_progress_clean;"
+      ],
+      "catalog": "workspace",
+      "schema": "gym_progress"
+    },
+    {
+      "name": "7ab17e49",
+      "displayName": "calorie bal",
+      "queryLines": [
+        "SELECT\r\n",
+        "  Day_Number,\r\n",
+        "  Calories_Intake,\r\n",
+        "  Active_Calories,\r\n",
+        "  Calorie_Balance,\r\n",
+        "  RANK() OVER (ORDER BY Calorie_Balance DESC) AS Surplus_Rank\r\n",
+        "FROM workspace.gym_progress.gym_progress_clean\r\n",
+        "ORDER BY Surplus_Rank;"
+      ],
+      "catalog": "workspace",
+      "schema": "gym_progress"
+    },
+    {
+      "name": "c8aeb666",
+      "displayName": "Untitled dataset",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `default`;\n",
+        "\n",
+        "SELECT\n",
+        "  Day_Number,\n",
+        "  Calories_Intake,\n",
+        "  Active_Calories,\n",
+        "  Calorie_Balance,\n",
+        "  RANK() OVER (ORDER BY Calorie_Balance DESC) AS Surplus_Rank\n",
+        "FROM workspace.gym_progress.gym_progress_clean\n",
+        "ORDER BY Surplus_Rank;\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "5cbbb504",
+      "displayName": "Progress",
+      "layout": [
+        {
+          "widget": {
+            "name": "08310962",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "abce452b",
+                  "fields": [
+                    {
+                      "name": "Prev_Weight",
+                      "expression": "`Prev_Weight`"
+                    },
+                    {
+                      "name": "sum(Weight_kg)",
+                      "expression": "SUM(`Weight_kg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "Prev_Weight",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Weight_kg)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Weight Progress and Previous Day Comparison",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "ec86a97f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cf810063",
+                  "fields": [
+                    {
+                      "name": "Day_Number",
+                      "expression": "`Day_Number`"
+                    },
+                    {
+                      "name": "sum(Weight_kg)",
+                      "expression": "SUM(`Weight_kg`)"
+                    },
+                    {
+                      "name": "sum(Moving_Avg_Weight_3d)",
+                      "expression": "SUM(`Moving_Avg_Weight_3d`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Day_Number",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "sum(Weight_kg)"
+                    },
+                    {
+                      "fieldName": "sum(Moving_Avg_Weight_3d)"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Weight Trend with 3-Day Moving Average",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "layer"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "5e038ec8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "197d28be",
+                  "fields": [
+                    {
+                      "name": "Day_Number",
+                      "expression": "`Day_Number`"
+                    },
+                    {
+                      "name": "sum(Cumulative_Steps)",
+                      "expression": "SUM(`Cumulative_Steps`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Day_Number",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Cumulative_Steps)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Cumulative Steps Walked Over Time",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "layer"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d6329f56",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8a4aed74",
+                  "fields": [
+                    {
+                      "name": "Day_Number",
+                      "expression": "`Day_Number`"
+                    },
+                    {
+                      "name": "Workout_Duration_min",
+                      "expression": "`Workout_Duration_min`"
+                    },
+                    {
+                      "name": "Steps_Walked",
+                      "expression": "`Steps_Walked`"
+                    },
+                    {
+                      "name": "Steps_per_minute",
+                      "expression": "`Steps_per_minute`"
+                    },
+                    {
+                      "name": "Efficiency_Quartile",
+                      "expression": "`Efficiency_Quartile`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "Day_Number",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "Day_Number",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Workout_Duration_min",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "Workout_Duration_min",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Steps_Walked",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "Steps_Walked",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Steps_per_minute",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "Steps_per_minute",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "Efficiency_Quartile",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "Efficiency_Quartile",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 5,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "title": "Workout Efficiency by Day",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 20,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c129773f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c8aeb666",
+                  "fields": [
+                    {
+                      "name": "Day_Number",
+                      "expression": "`Day_Number`"
+                    },
+                    {
+                      "name": "sum(Calorie_Balance)",
+                      "expression": "SUM(`Calorie_Balance`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Day_Number",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Calorie_Balance)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "sum of calorie balance with Day number",
+                "showTitle": true
+              },
+              "mark": {
+                "layout": "group"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "average-steps",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0b063925",
+                  "fields": [
+                    {
+                      "name": "Avg_Steps_per_minute",
+                      "expression": "`Avg_Steps_per_minute`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Avg_Steps_per_minute"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Average Steps per minute\n"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "average-protein-per-kg",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0b063925",
+                  "fields": [
+                    {
+                      "name": "Avg_Protein_per_kg",
+                      "expression": "`Avg_Protein_per_kg`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Avg_Protein_per_kg"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Average Protien per kg"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "264adf7f",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "e932023b",
+            "queries": [
+              {
+                "name": "dashboards/01f0d308de631d66a1787c229aae541e/datasets/01f0d30b398f1cc7abdaed0419efcfbc_Efficiency_Quartile",
+                "query": {
+                  "datasetName": "8a4aed74",
+                  "fields": [
+                    {
+                      "name": "Efficiency_Quartile",
+                      "expression": "`Efficiency_Quartile`"
+                    },
+                    {
+                      "name": "Efficiency_Quartile_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Efficiency_Quartile",
+                    "queryName": "dashboards/01f0d308de631d66a1787c229aae541e/datasets/01f0d30b398f1cc7abdaed0419efcfbc_Efficiency_Quartile"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f05e1828",
+            "queries": [
+              {
+                "name": "dashboards/01f0d308de631d66a1787c229aae541e/datasets/01f0d30d79b41da8b7ae9879242fb5c9_Calorie_Balance",
+                "query": {
+                  "datasetName": "7ab17e49",
+                  "fields": [
+                    {
+                      "name": "Calorie_Balance",
+                      "expression": "`Calorie_Balance`"
+                    },
+                    {
+                      "name": "Calorie_Balance_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "Calorie_Balance",
+                    "queryName": "dashboards/01f0d308de631d66a1787c229aae541e/datasets/01f0d30d79b41da8b7ae9879242fb5c9_Calorie_Balance"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              },
+              "selection": {
+                "defaultSelection": {
+                  "operator": {
+                    "operator": "OR",
+                    "args": []
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
